@@ -53,6 +53,30 @@ def rss_mb(pid: int) -> float:
         return 0.0
 
 
+def device_peak_mb() -> dict:
+    """Peak accelerator memory in MB.
+
+    On Apple Silicon, Metal/MPS and MLX allocations live in unified memory but
+    are NOT reflected in process RSS, so RSS alone badly understates a model's
+    footprint. Capture whichever runtime is loaded.
+    """
+    out = {}
+    try:
+        import torch
+        if hasattr(torch, "mps") and torch.backends.mps.is_available():
+            out["torch_mps_driver_mb"] = round(
+                torch.mps.driver_allocated_memory() / 1048576, 1)
+    except Exception:
+        pass
+    try:
+        import mlx.core as mx
+        out["mlx_peak_mb"] = round(mx.get_peak_memory() / 1048576, 1)
+        out["mlx_active_mb"] = round(mx.get_active_memory() / 1048576, 1)
+    except Exception:
+        pass
+    return out
+
+
 def peak_rss_self_mb() -> float:
     """Peak RSS of the current process (ru_maxrss is bytes on macOS)."""
     import os

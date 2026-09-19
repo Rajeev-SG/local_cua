@@ -101,6 +101,8 @@
     document.getElementById('save-settings').style.display = 'inline-block';
   });
   render();
+
+  window.__state = () => ({ todos: todos.map(t => ({...t})), filter });
 </script>
 </body>
 </html>

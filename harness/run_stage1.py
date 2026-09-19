@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .browser import Executor, fixture_url
 from .capture import SCENES, OUT as FIX_OUT
-from .metrics import score_point, peak_rss_self_mb
+from .metrics import score_point, peak_rss_self_mb, device_peak_mb
 from .adapters import get_adapter
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
@@ -102,6 +102,7 @@ def run(model_key: str, warm_reps: int = 3, limit: int | None = None) -> None:
                 "trace": traceback.format_exc()[-800:],
             })
         row["peak_rss_mb"] = peak_rss_self_mb()
+        row["device_peak"] = device_peak_mb()
         with JSONL.open("a") as f:
             f.write(json.dumps(row) + "\n")
         print(f"  {name}: hit={row.get('hit')} "

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse, json, time, traceback
 from pathlib import Path
 from .capture import OUT as FIX_OUT
-from .metrics import score_point, peak_rss_self_mb
+from .metrics import score_point, peak_rss_self_mb, device_peak_mb
 from .adapters import get_adapter
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
@@ -56,6 +56,7 @@ def run(model_key, mode, warm_reps=3):
             row.update({"hit": False, "error": f"{type(e).__name__}: {e}",
                         "trace": traceback.format_exc()[-600:]})
         row["peak_rss_mb"] = peak_rss_self_mb()
+        row["device_peak"] = device_peak_mb()
         with JSONL.open("a") as f:
             f.write(json.dumps(row) + "\n")
         print(f"  {name}: hit={row.get('hit')} infer={row.get('inference_ms')}ms pt={row.get('predicted_point')}")
