@@ -1,0 +1,24 @@
+{
+  "scene": "2",
+  "instruction": "Click the email address text field.",
+  "selector": "#t2_email",
+  "bbox": {
+    "x": 45,
+    "y": 138.1875,
+    "w": 320,
+    "h": 39,
+    "cx": 205.0,
+    "cy": 157.6875
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene2/shot.png"
+}

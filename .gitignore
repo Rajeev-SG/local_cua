@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# binary screenshot artifacts (regenerable; rows reference them by path)
+results/fixtures/stage1/*/shot.png
+results/runs/*.png

@@ -1,0 +1,24 @@
+{
+  "scene": "3",
+  "instruction": "Click the checkbox labelled 'I accept the terms'.",
+  "selector": "#t3_terms",
+  "bbox": {
+    "x": 49,
+    "y": 141.1875,
+    "w": 18,
+    "h": 18,
+    "cx": 58.0,
+    "cy": 150.1875
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene3/shot.png"
+}

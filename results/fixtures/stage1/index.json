@@ -1,0 +1,194 @@
+{
+  "scene1": {
+    "scene": "1",
+    "instruction": "Click the 'Save changes' button.",
+    "selector": "#t1_primary",
+    "bbox": {
+      "x": 45,
+      "y": 140.1875,
+      "w": 133.078125,
+      "h": 39,
+      "cx": 111.5390625,
+      "cy": 159.6875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene1/shot.png"
+  },
+  "scene2": {
+    "scene": "2",
+    "instruction": "Click the email address text field.",
+    "selector": "#t2_email",
+    "bbox": {
+      "x": 45,
+      "y": 138.1875,
+      "w": 320,
+      "h": 39,
+      "cx": 205.0,
+      "cy": 157.6875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene2/shot.png"
+  },
+  "scene3": {
+    "scene": "3",
+    "instruction": "Click the checkbox labelled 'I accept the terms'.",
+    "selector": "#t3_terms",
+    "bbox": {
+      "x": 49,
+      "y": 141.1875,
+      "w": 18,
+      "h": 18,
+      "cx": 58.0,
+      "cy": 150.1875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene3/shot.png"
+  },
+  "scene4": {
+    "scene": "4",
+    "instruction": "Click the 'Active' filter tab.",
+    "selector": "#t4_active",
+    "bbox": {
+      "x": 104,
+      "y": 138.1875,
+      "w": 78.078125,
+      "h": 41.390625,
+      "cx": 143.0390625,
+      "cy": 158.8828125
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene4/shot.png"
+  },
+  "scene5": {
+    "scene": "5",
+    "instruction": "Open the country dropdown.",
+    "selector": "#t5_country",
+    "bbox": {
+      "x": 45,
+      "y": 138.1875,
+      "w": 164,
+      "h": 41,
+      "cx": 127.0,
+      "cy": 158.6875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene5/shot.png"
+  },
+  "scene6": {
+    "scene": "6",
+    "instruction": "Click the small link 'See full terms and conditions'.",
+    "selector": "#t6_terms_link",
+    "bbox": {
+      "x": 45,
+      "y": 182.578125,
+      "w": 168.265625,
+      "h": 15,
+      "cx": 129.1328125,
+      "cy": 190.078125
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 900,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene6/shot.png"
+  },
+  "scene7": {
+    "scene": "7",
+    "instruction": "Click the 'Confirm at bottom' button.",
+    "selector": "#t7_bottom",
+    "bbox": {
+      "x": 45,
+      "y": 792.1875,
+      "w": 157.21875,
+      "h": 39,
+      "cx": 123.609375,
+      "cy": 811.6875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 746,
+      "h": 1646,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene7/shot.png"
+  },
+  "scene8": {
+    "scene": "8",
+    "instruction": "Click the 'Delete workspace' button (not the 'Delete account' button).",
+    "selector": "#t8_delete_b",
+    "bbox": {
+      "x": 207,
+      "y": 138.1875,
+      "w": 157.234375,
+      "h": 39,
+      "cx": 285.6171875,
+      "cy": 157.6875
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "x": 0,
+      "y": 0,
+      "h": 1211,
+      "vh": 900
+    },
+    "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene8/shot.png"
+  }
+}

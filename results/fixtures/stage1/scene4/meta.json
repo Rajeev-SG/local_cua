@@ -1,0 +1,24 @@
+{
+  "scene": "4",
+  "instruction": "Click the 'Active' filter tab.",
+  "selector": "#t4_active",
+  "bbox": {
+    "x": 104,
+    "y": 138.1875,
+    "w": 78.078125,
+    "h": 41.390625,
+    "cx": 143.0390625,
+    "cy": 158.8828125
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene4/shot.png"
+}

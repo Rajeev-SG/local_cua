@@ -1,0 +1,3 @@
+# Test-only deps (parsers/metrics are stdlib + numpy)
+pytest
+numpy
