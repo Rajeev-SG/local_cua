@@ -15,7 +15,7 @@ from pathlib import Path
 
 from . import tasks
 from .browser import Executor
-from .metrics import peak_rss_self_mb, score_point
+from .metrics import peak_rss_self_mb, score_point, device_peak_mb
 from .adapters import get_adapter
 from .run_stage1 import JSONL as S1
 
@@ -87,7 +87,8 @@ def run(model_key, mode=None, reps=2, only=None):
                         para = {"step": step, "subgoal": subgoal, "selector": sel,
                                 "target_bbox": bbox, "native_text": pred.native_text,
                                 "parse_ok": pred.parse_ok, "inference_ms": pred.inference_ms,
-                                "actor_action": act}
+                                "actor_action": {"kind": act.kind, "x": act.x, "y": act.y,
+                                                 "text": act.text}}
                         if pred.point and bbox:
                             sc = score_point(pred.point[0], pred.point[1], bbox)
                             para.update({"predicted_point": list(pred.point),
@@ -116,7 +117,7 @@ def run(model_key, mode=None, reps=2, only=None):
                 row.update({"pass": False, "error": f"{type(e).__name__}: {e}",
                             "trace": traceback.format_exc()[-800:], "step_detail": steps})
             row["peak_rss_mb"] = peak_rss_self_mb()
-        row["device_peak"] = device_peak_mb()
+            row["device_peak"] = device_peak_mb()
             _append(row)
             print(f"  {tk} rep{rep+1}: pass={row.get('pass')} steps={row.get('steps')}"
                   f"{' ERR=' + row.get('error','') if row.get('error') else ''}")
