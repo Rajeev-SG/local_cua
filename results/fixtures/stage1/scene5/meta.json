@@ -1,0 +1,24 @@
+{
+  "scene": "5",
+  "instruction": "Open the country dropdown.",
+  "selector": "#t5_country",
+  "bbox": {
+    "x": 45,
+    "y": 138.1875,
+    "w": 164,
+    "h": 41,
+    "cx": 127.0,
+    "cy": 158.6875
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene5/shot.png"
+}

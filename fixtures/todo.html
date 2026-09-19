@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>local_cua todo fixture</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.45 -apple-system,Segoe UI,Roboto,sans-serif; background:#f4f5f8; color:#1b1b1f; }
+  header { padding:16px 24px; background:#fff; border-bottom:1px solid #d8dae2; font-weight:700; }
+  .wrap { max-width:640px; margin:28px auto; background:#fff; border:1px solid #d8dae2; border-radius:12px; padding:24px; }
+  .newrow { display:flex; gap:10px; margin-bottom:18px; }
+  input#new-todo { flex:1; border:1px solid #d8dae2; border-radius:8px; padding:12px 14px; font-size:16px; }
+  button#add-todo, button#open-settings, button#save-settings { border:1px solid #d8dae2; border-radius:8px; padding:12px 16px; background:#2f6df6; color:#fff; border-color:#2f6df6; font-size:15px; cursor:pointer; }
+  ul#list { list-style:none; margin:0; padding:0; }
+  li.todo { display:flex; align-items:center; gap:12px; padding:12px 6px; border-bottom:1px solid #eceef4; }
+  li.todo input[type=checkbox] { width:20px; height:20px; }
+  li.todo .title { flex:1; }
+  li.todo.done .title { text-decoration:line-through; color:#98a0b3; }
+  .filters { display:flex; gap:8px; margin-top:18px; }
+  .filters button { border:1px solid #d8dae2; background:#fff; border-radius:8px; padding:9px 16px; cursor:pointer; }
+  .filters button.active { background:#eef2ff; border-color:#2f6df6; color:#2f6df6; font-weight:600; }
+  .empty { color:#98a0b3; padding:14px 6px; }
+  .footer { margin-top:16px; color:#6b7280; font-size:14px; }
+</style>
+</head>
+<body>
+<header>local_cua TodoMVC-style tiny-task fixture</header>
+<div class="wrap">
+  <div class="newrow">
+    <input id="new-todo" type="text" placeholder="What needs to be done?">
+    <button id="add-todo">Add</button>
+  </div>
+  <ul id="list"></ul>
+  <div id="empty" class="empty">No todos yet.</div>
+  <div class="filters">
+    <button id="f-all" class="active" data-filter="all">All</button>
+    <button id="f-active" data-filter="active">Active</button>
+    <button id="f-done" data-filter="completed">Completed</button>
+  </div>
+  <div class="footer"><span id="count">0</span> items</div>
+  <div style="margin-top:22px">
+    <button id="open-settings">Open settings</button>
+    <button id="save-settings" style="background:#fff;color:#1b1b1f;border-color:#d8dae2;display:none">Save settings</button>
+  </div>
+</div>
+<script>
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const input = document.getElementById('new-todo');
+  const count = document.getElementById('count');
+  let todos = [];
+  let filter = 'all';
+  let id = 0;
+
+  function render() {
+    list.innerHTML = '';
+    const visible = todos.filter(t =>
+      filter === 'all' ? true : filter === 'active' ? !t.done : t.done);
+    for (const t of visible) {
+      const li = document.createElement('li');
+      li.className = 'todo' + (t.done ? ' done' : '');
+      li.dataset.id = t.id;
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = t.done; cb.dataset.act = 'toggle';
+      const span = document.createElement('span');
+      span.className = 'title'; span.textContent = t.title;
+      li.appendChild(cb); li.appendChild(span);
+      list.appendChild(li);
+    }
+    empty.style.display = visible.length ? 'none' : 'block';
+    count.textContent = todos.filter(t => !t.done).length;
+  }
+
+  function add(title) {
+    if (!title.trim()) return;
+    todos.push({id: ++id, title: title.trim(), done: false});
+    input.value = '';
+    render();
+  }
+
+  document.getElementById('add-todo').addEventListener('click', () => add(input.value));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') add(input.value); });
+  list.addEventListener('change', e => {
+    if (e.target.dataset.act === 'toggle') {
+      const lid = Number(e.target.closest('li').dataset.id);
+      const t = todos.find(x => x.id === lid);
+      if (t) t.done = e.target.checked;
+      render();
+    }
+  });
+  document.querySelectorAll('.filters button').forEach(b => {
+    b.addEventListener('click', () => {
+      filter = b.dataset.filter;
+      document.querySelectorAll('.filters button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      render();
+    });
+  });
+  document.getElementById('open-settings').addEventListener('click', () => {
+    document.getElementById('open-settings').style.display = 'none';
+    document.getElementById('save-settings').style.display = 'inline-block';
+  });
+  render();
+</script>
+</body>
+</html>

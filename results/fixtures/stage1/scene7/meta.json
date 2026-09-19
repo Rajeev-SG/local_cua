@@ -1,0 +1,24 @@
+{
+  "scene": "7",
+  "instruction": "Click the 'Confirm at bottom' button.",
+  "selector": "#t7_bottom",
+  "bbox": {
+    "x": 45,
+    "y": 792.1875,
+    "w": 157.21875,
+    "h": 39,
+    "cx": 123.609375,
+    "cy": 811.6875
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 746,
+    "h": 1646,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene7/shot.png"
+}

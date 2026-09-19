@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>local_cua grounding fixture</title>
+<style>
+  :root { --ink:#1b1b1f; --line:#d5d7de; --accent:#2f6df6; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.4 -apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:#f6f7fb; }
+  header { padding:14px 22px; background:#fff; border-bottom:1px solid var(--line); font-weight:600; }
+  .wrap { padding:26px 22px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:22px; margin-bottom:20px; }
+  h2 { font-size:17px; margin:0 0 14px; }
+  .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  button, .btn { border:1px solid var(--line); background:#fff; border-radius:8px; padding:10px 18px; font-size:15px; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  input[type=text] { border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:15px; width:320px; }
+  label.check { display:flex; align-items:center; gap:8px; }
+  input[type=checkbox] { width:18px; height:18px; }
+  select { border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:15px; }
+  .tabbar { display:flex; gap:6px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+  .tab { padding:9px 16px; border:1px solid transparent; border-bottom:none; border-radius:8px 8px 0 0; cursor:pointer; color:#555; }
+  .tab.active { background:#eef2ff; color:var(--accent); border-color:var(--line); font-weight:600; }
+  a.small { color:var(--accent); font-size:13px; text-decoration:underline; }
+  .similar { display:flex; gap:12px; }
+  .similar button { min-width:150px; }
+  .tall { height:1400px; background:linear-gradient(#fff,#f0f3fa); border:1px dashed var(--line); border-radius:10px; }
+  .spacer { height:900px; }
+  .hidden { display:none !important; }
+  .note { color:#666; font-size:13px; margin-top:8px; }
+</style>
+</head>
+<body>
+<header>local_cua deterministic grounding fixture</header>
+<div class="wrap">
+  <div id="scene1" class="card scene hidden">
+    <h2>Scene 1 — button / link</h2>
+    <div class="row">
+      <button id="t1_primary" class="primary">Save changes</button>
+      <button id="t1_secondary">Cancel</button>
+      <a id="t1_link" class="btn" href="#">Open settings</a>
+    </div>
+  </div>
+
+  <div id="scene2" class="card scene hidden">
+    <h2>Scene 2 — text input</h2>
+    <div class="row">
+      <input id="t2_email" type="text" placeholder="Email address">
+      <input id="t2_name" type="text" placeholder="Full name">
+    </div>
+  </div>
+
+  <div id="scene3" class="card scene hidden">
+    <h2>Scene 3 — checkbox</h2>
+    <div class="row">
+      <label class="check"><input id="t3_terms" type="checkbox"> I accept the terms</label>
+      <label class="check"><input id="t3_news" type="checkbox"> Send me newsletters</label>
+    </div>
+  </div>
+
+  <div id="scene4" class="card scene hidden">
+    <h2>Scene 4 — filter / tab</h2>
+    <div class="tabbar">
+      <div id="t4_all" class="tab active">All</div>
+      <div id="t4_active" class="tab">Active</div>
+      <div id="t4_done" class="tab">Completed</div>
+    </div>
+    <div class="note">Tabs switch the visible list.</div>
+  </div>
+
+  <div id="scene5" class="card scene hidden">
+    <h2>Scene 5 — dropdown</h2>
+    <div class="row">
+      <select id="t5_country">
+        <option value="">Choose a country</option>
+        <option value="gb">United Kingdom</option>
+        <option value="de">Germany</option>
+        <option value="fr">France</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="scene6" class="card scene hidden">
+    <h2>Scene 6 — small text target</h2>
+    <p>Full terms are available at the bottom of the page.</p>
+    <p><a id="t6_terms_link" class="small" href="#">See full terms and conditions</a></p>
+    <p class="note">Deliberately small, low-contrast target.</p>
+  </div>
+
+  <div id="scene7" class="card scene hidden">
+    <h2>Scene 7 — target after scroll</h2>
+    <div class="tall"></div>
+    <div class="row"><button id="t7_bottom" class="primary">Confirm at bottom</button></div>
+  </div>
+
+  <div id="scene8" class="card scene hidden">
+    <h2>Scene 8 — visually similar controls</h2>
+    <div class="similar">
+      <button id="t8_delete_a">Delete account</button>
+      <button id="t8_delete_b">Delete account</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="similar">
+      <button id="t8_cancel_a">Cancel</button>
+      <button id="t8_cancel_b">Cancel</button>
+    </div>
+    <div class="note">Duplicate labels; only the intended one counts.</div>
+  </div>
+</div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const n = params.get('scene') || '1';
+  const el = document.getElementById('scene' + n);
+  if (el) el.classList.remove('hidden');
+</script>
+</body>
+</html>

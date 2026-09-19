@@ -1,0 +1,24 @@
+{
+  "scene": "6",
+  "instruction": "Click the small link 'See full terms and conditions'.",
+  "selector": "#t6_terms_link",
+  "bbox": {
+    "x": 45,
+    "y": 182.578125,
+    "w": 168.265625,
+    "h": 15,
+    "cx": 129.1328125,
+    "cy": 190.078125
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene6/shot.png"
+}

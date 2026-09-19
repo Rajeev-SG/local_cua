@@ -1,0 +1,24 @@
+{
+  "scene": "1",
+  "instruction": "Click the 'Save changes' button.",
+  "selector": "#t1_primary",
+  "bbox": {
+    "x": 45,
+    "y": 140.1875,
+    "w": 133.078125,
+    "h": 39,
+    "cx": 111.5390625,
+    "cy": 159.6875
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "scroll": {
+    "x": 0,
+    "y": 0,
+    "h": 900,
+    "vh": 900
+  },
+  "screenshot": "/Users/rajeev/Code/local_cua/results/fixtures/stage1/scene1/shot.png"
+}
