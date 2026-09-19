@@ -157,7 +157,11 @@ def parse_fara(text: str, viewport: dict):
     coord = args.get("coordinate") or []
     x = y = None
     if isinstance(coord, (list, tuple)) and len(coord) >= 2:
-        # 1000x1000 space -> viewport
+        # Fara always predicts in a FIXED 1000x1000 space (Microsoft model card:
+        # "coordinates are returned in a fixed 1000x1000 space; scale to your
+        # viewport"). This is viewport-independent: verified empirically that the
+        # model returns the same coordinate when told 1440x900 or 1000x1000
+        # (tests/test_parsers.py::test_fara_space_is_viewport_independent).
         x = float(coord[0]) / 1000.0 * viewport["width"]
         y = float(coord[1]) / 1000.0 * viewport["height"]
     kind_map = {
@@ -177,7 +181,11 @@ def parse_fara(text: str, viewport: dict):
         keys = args.get("keys") or []
         na.keys = "+".join(keys) if isinstance(keys, list) else str(keys)
     if act in ("scroll", "hscroll"):
-        na.dy = float(args.get("pixels", 300) or 300)
+        # Fara schema: "Positive values scroll up, negative values scroll down."
+        # Playwright mouse.wheel: positive dy scrolls DOWN -> invert.
+        px = float(args.get("pixels", 300) or 300)
+        na.dy = -px if act == "scroll" else 0.0
+        na.dx = px if act == "hscroll" else 0.0
     if act == "visit_url":
         na.url = str(args.get("url", ""))
     if act in ("terminate", "ask_user_question", "read_page_answer_question"):

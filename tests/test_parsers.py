@@ -195,11 +195,15 @@ def _fixtures():
 
 def test_stage1_known_hit_and_miss_per_scene():
     """Each scene: the recorded DOM centre must score a hit, and centre + far
-    offset must score a miss. Guards against a flipped/serialised bbox."""
+    offset must score a miss. Guards against a flipped/serialised bbox.
+
+    The fixture index (bbox metadata only, no screenshots) is committed, so this
+    must run in CI - it fails loudly rather than skipping if the index is absent.
+    """
     fx = _fixtures()
-    if not fx:
-        import pytest
-        pytest.skip("stage1 fixtures not built")
+    assert fx, ("stage1 fixture index missing: expected "
+                "results/fixtures/stage1/index.json to be committed")
+    assert len(fx) == 8, f"expected 8 scenes, got {len(fx)}"
     for name, meta in fx.items():
         b = meta["bbox"]
         assert point_in_bbox(b["cx"], b["cy"], b), f"{name}: centre should hit"
@@ -207,3 +211,36 @@ def test_stage1_known_hit_and_miss_per_scene():
             f"{name}: far corner should miss"
         hit = score_point(b["cx"], b["cy"], b)
         assert hit.hit and hit.dist_to_center_px == 0.0
+
+
+# ---------------- Fara coordinate-space + scroll regressions (review F1/F2) ----------------
+def test_fara_space_is_viewport_independent():
+    """Fara predicts in a FIXED 1000x1000 space regardless of viewport.
+    The same raw coordinate must scale differently per viewport - i.e. the
+    adapter must NOT treat the number as already being viewport pixels."""
+    txt = ('<tool_call>{"name": "computer_use", "arguments": '
+           '{"action": "left_click", "coordinate": [196, 175]}}</tool_call>')
+    a_1440, _ = parse_fara(txt, {"width": 1440, "height": 900})
+    a_1280, _ = parse_fara(txt, {"width": 1280, "height": 800})
+    assert round(a_1440.x, 1) == 282.2 and round(a_1440.y, 1) == 157.5
+    assert round(a_1280.x, 1) == 250.9 and round(a_1280.y, 1) == 140.0
+    assert a_1440.x != a_1280.x, "scaling must depend on the viewport"
+
+
+def test_fara_scroll_direction_passthrough():
+    """Fara: positive pixels = scroll UP. Playwright: positive dy = scroll DOWN.
+    The adapter must invert, and upward scroll must be representable."""
+    up = ('<tool_call>{"name": "computer_use", "arguments": '
+          '{"action": "scroll", "pixels": 400}}</tool_call>')
+    a_up, _ = parse_fara(up, V)
+    assert a_up.dy == -400, "scroll up must become negative dy"
+
+    down = ('<tool_call>{"name": "computer_use", "arguments": '
+            '{"action": "scroll", "pixels": -400}}</tool_call>')
+    a_down, _ = parse_fara(down, V)
+    assert a_down.dy == 400
+
+    h = ('<tool_call>{"name": "computer_use", "arguments": '
+         '{"action": "hscroll", "pixels": 200}}</tool_call>')
+    a_h, _ = parse_fara(h, V)
+    assert a_h.dx == 200 and a_h.dy == 0.0

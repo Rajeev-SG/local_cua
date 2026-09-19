@@ -166,7 +166,9 @@ def _execute(ex: Executor, act):
         elif act.kind == "key":
             r = ex.key(act.keys or "Enter")
         elif act.kind == "scroll":
-            r = ex.scroll(act.dx or 0, act.dy or 400)
+            dx = act.dx if act.dx is not None else 0
+            dy = act.dy if act.dy is not None else 400
+            r = ex.scroll(dx, dy)
         elif act.kind == "navigate" and act.url:
             r = ex.navigate(act.url)
         elif act.kind == "back":

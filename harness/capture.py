@@ -20,7 +20,7 @@ SCENES = {
     "5": ("Open the country dropdown.", "#t5_country"),
     "6": ("Click the small link 'See full terms and conditions'.", "#t6_terms_link"),
     "7": ("Click the 'Confirm at bottom' button.", "#t7_bottom"),
-    "8": ("Click the second 'Delete account' button (the right-hand one).", "#t8_delete_b"),
+    "8": ("Click the 'Delete workspace' button (not the 'Delete account' button).", "#t8_delete_b"),
 }
 
 

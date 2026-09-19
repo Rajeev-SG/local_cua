@@ -28,7 +28,8 @@ def ensure_fixtures() -> dict:
     return json.loads(idx.read_text())
 
 
-def run(model_key: str, warm_reps: int = 3, limit: int | None = None) -> None:
+def run(model_key: str, warm_reps: int = 3, limit: int | None = None,
+        scenes: list | None = None) -> None:
     fixtures = ensure_fixtures()
     viewport = fixtures["scene1"]["viewport"]
 
@@ -41,6 +42,8 @@ def run(model_key: str, warm_reps: int = 3, limit: int | None = None) -> None:
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     items = list(fixtures.items())
+    if scenes:
+        items = [(k, v) for k, v in items if k in scenes]
     if limit:
         items = items[:limit]
 
@@ -117,5 +120,7 @@ if __name__ == "__main__":
     ap.add_argument("model")
     ap.add_argument("--warm-reps", type=int, default=3)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--scene", default=None, help="comma-separated scene names e.g. scene8")
     a = ap.parse_args()
-    run(a.model, a.warm_reps, a.limit)
+    sc = a.scene.split(",") if a.scene else None
+    run(a.model, a.warm_reps, a.limit, sc)

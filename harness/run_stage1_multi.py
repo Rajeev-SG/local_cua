@@ -10,7 +10,7 @@ RESULTS = Path(__file__).resolve().parent.parent / "results"
 JSONL = RESULTS / "stage1.jsonl"
 
 
-def run(model_key, mode, warm_reps=3):
+def run(model_key, mode, warm_reps=3, scenes=None):
     fixtures = json.loads((FIX_OUT / "index.json").read_text())
     viewport = fixtures["scene1"]["viewport"]
     t0 = time.perf_counter()
@@ -67,5 +67,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("model"); ap.add_argument("--mode", default="direct")
     ap.add_argument("--warm-reps", type=int, default=3)
+    ap.add_argument("--scene", default=None)
     a = ap.parse_args()
-    run(a.model, a.mode, a.warm_reps)
+    sc = a.scene.split(",") if a.scene else None
+    run(a.model, a.mode, a.warm_reps, sc)

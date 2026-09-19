@@ -169,14 +169,14 @@
   },
   "scene8": {
     "scene": "8",
-    "instruction": "Click the second 'Delete account' button (the right-hand one).",
+    "instruction": "Click the 'Delete workspace' button (not the 'Delete account' button).",
     "selector": "#t8_delete_b",
     "bbox": {
       "x": 207,
       "y": 138.1875,
-      "w": 150,
+      "w": 157.234375,
       "h": 39,
-      "cx": 282.0,
+      "cx": 285.6171875,
       "cy": 157.6875
     },
     "viewport": {
