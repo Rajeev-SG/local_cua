@@ -27,10 +27,10 @@ class TongUIAdapter(Adapter):
 
     def load(self):
         import torch
-        from transformers import AutoProcessor, AutoModelForVision2Seq
+        from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
         self.torch = torch
         self.processor = AutoProcessor.from_pretrained(self.artifact)
-        self.model = AutoModelForVision2Seq.from_pretrained(
+        self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             self.artifact, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True)
         self.model.to("mps")
         self.model.eval()
