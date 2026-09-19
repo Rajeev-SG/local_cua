@@ -97,17 +97,20 @@ under-report this, so it is measured directly).
 | Model | On disk | Resident while running | Peak (high-water) | Boot-up | Time per action | Notes |
 |---|---:|---:|---:|---:|---:|---|
 | **ShowUI-2B** | 2.2 GB | **2.2 GB** | 3.2 GB | ~4 s | **~2.7 s** | Lightest and quickest |
-| **Fara1.5-4B** | 4.0 GB | **4.0 GB** | 6.9 GB | ~4 s | ~3.1 s | Best all-rounder |
+| **Fara1.5-4B** | 4.0 GB | **4.0 GB** | 7.6 GB | ~4 s | ~3.1 s | Best all-rounder |
 | **UGround-V1-2B** | 4.4 GB | **4.4 GB** | 5.4 GB | ~4 s | ~2.6 s | Pointer only |
-| **UI-TARS-2B-SFT** | 9.8 GB (shipped fp32) | **4.5 GB** (cast to bf16) | 5.5 GB | ~17 s | ~4.7 s | Slowest to load, weakest answers |
+| **UI-TARS-2B-SFT** | 9.8 GB (shipped fp32) | **4.5 GB** (cast to bf16) | 5.6 GB | ~17 s | ~4.7 s | Slowest to load, weakest answers |
 | **TongUI-3B** | 7.5 GB | **7.6 GB** | 9.2 GB | ~16 s | ~3.5 s | Heaviest to run; best grounding |
 
-"Resident" is what the model actually holds while running (the number to compare against
-your RAM); "peak" is the high-water mark including load-time buffers, which is what matters
-if you are squeezing alongside other apps. Both are accelerator memory in the Mac's shared
-pool, measured directly after a real inference (`scripts/measure_memory.py`) - normal Mac
-RAM monitors under-report this, so do not trust Activity Monitor for it. UI-TARS ships in
-**fp32** (9.8 GB to download) but loads to ~4.5 GB once cast to bf16.
+"Resident" is what the model holds while running (the number to compare against your RAM),
+reported as the **median of 3 post-warm-up runs**; "peak" is the high-water mark including
+load-time buffers (a single max, since it is not resettable). Both are accelerator memory in
+the Mac's shared pool, measured directly with `scripts/measure_memory.py` - normal Mac RAM
+monitors under-report this, so do not trust Activity Monitor. These are **one machine,
+one session** figures: peak in particular drifts a little run to run (Fara measured 6.9-7.6
+GB across runs). Treat resident as the planning number and peak as "leave this much
+headroom". UI-TARS ships in **fp32** (9.8 GB to download) but loads to ~4.5 GB once cast to
+bf16.
 
 Practical read: **Fara and ShowUI fit comfortably** on a 48 GB Mac next to a browser, and
 UGround is close behind. **TongUI-3B is the only one worth thinking about** (~7.6 GB
@@ -158,6 +161,7 @@ uv pip install --python .venv/bin/python mlx mlx-vlm torch torchvision transform
 .venv/bin/python -m playwright install chromium
 .venv/bin/python -m pytest tests/ -q     # parser + metrics + fixture checks
 python -m harness.capture                # build the 8 grounding screenshots
+.venv/bin/python scripts/measure_memory.py fara   # re-check a memory figure
 scripts/run_all_stage1.sh                # groundings, ~15 min
 scripts/run_all_stage2.sh                # tiny tasks, ~25 min
 ```
