@@ -257,6 +257,24 @@ family's missing eval/plan primitive, which capacity cannot fix. Keep **Fara-4B*
 local grounder/agent and **ShowUI-2B** as the local actor; spend the escalation budget on
 a strong planner that owns the DOM loop.
 
+**Scope of this evidence — read before quoting any Stage-3 number.**
+
+- **Stage 3 is a channel-limit measurement, NOT model-parity evidence.** Both Fara sizes
+  score 0/6, but that is because *no Fara artifact has a DOM/eval channel* — not because
+  4B and 9B are equally capable. The measured strong-agent baselines clear 3–4 of the same
+  6 tasks. So the Stage-3 rows **discriminate the channel, not the two model sizes**; the
+  4B-vs-9B comparison rests on Stages 1–2 (where both are measurable and equal) plus the
+  Stage-3 *cost* delta (latency/memory for the same zero), never on the Stage-3 pass rate
+  as a capability signal.
+- **The 4B/9B "match" is therefore between two models that are both below the Stage-3
+  instrument floor.** It is a valid statement about *these artifacts on this harness*, and
+  it is the honest basis for "don't buy the 9B", but it is not a claim that 9B is no more
+  capable in general — a harness that gave Fara a DOM/eval channel could separate them.
+- **This is explicitly acknowledged as the reason no broader capability claim is made**
+  from Stage 3. The required strong-agent baseline was **run** (it exists in
+  `web-automation-microbench`), so the "planner required" column is measured, not inferred
+  from architecture alone.
+
 ### 5.6 Frontier calls/tokens avoided (estimate, where computable)
 
 Computed from this run's task counts, i.e. the local work that did **not** need a
