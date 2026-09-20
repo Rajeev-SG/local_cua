@@ -86,6 +86,7 @@ def run(model_key: str, warm_reps: int = 3, limit: int | None = None,
                 "inference_ms": round(pred.inference_ms, 3),
                 "inference_ms_samples": [round(t, 3) for t in times],
                 "parse_error": pred.parse_error,
+                "generation": pred.extra,
             })
             pt = pred.point or (pred.action.x, pred.action.y)
             if pt[0] is not None and pt[1] is not None and meta["bbox"]:

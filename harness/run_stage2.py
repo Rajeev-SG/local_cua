@@ -101,6 +101,7 @@ def run(model_key, mode=None, reps=2, only=None):
                         para = {"step": step, "native_text": pred.native_text,
                                 "parse_ok": pred.parse_ok, "inference_ms": pred.inference_ms,
                                 "action_kind": act.kind,
+                                "generation": pred.extra,
                                 "predicted_point": [act.x, act.y] if act.x is not None else None}
                     parsed_act = _execute(ex, act)
                     para["executor"] = parsed_act
