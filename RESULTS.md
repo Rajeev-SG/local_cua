@@ -166,3 +166,135 @@ python -m harness.capture                 # build Stage-1 fixtures
 scripts/run_all_stage1.sh                 # ~15 min
 scripts/run_all_stage2.sh                 # ~25 min
 ```
+
+---
+
+## 5. Fara1.5-4B vs Fara1.5-9B — is the bigger sibling worth a default slot? (#15)
+
+`mlx-community/Fara1.5-9B-8bit` is the same Fara1.5 family, same verbatim Microsoft
+system prompt, same `computer_use` schema, same fixed 1000×1000 coordinate contract as
+the promoted 4B artifact; the only adapter change is the artifact, the quant label and
+the backbone named in the identity block. That makes this the cleanest matched
+comparison in the repo: **one variable, capacity (4B/4-bit vs 9B/8-bit).**
+
+### 5.1 Four frontiers, both models
+
+| Axis | Fara1.5-4B (4-bit MLX) | Fara1.5-9B (8-bit MLX) |
+|---|---|---|
+| Stage-1 grounding hits | **8/8** | **8/8** |
+| Stage-1 warm p50 / p95 | 2.46 s / 2.49 s | 4.42 s / 4.47 s |
+| Stage-1 parse validity | 8/8 | 8/8 |
+| Stage-1 gen speed | ~83 tok/s | ~31.5 tok/s |
+| Stage-2 T1 (1-step) | **2/2** | **2/2** |
+| Stage-2 T2 (input+commit) | **2/2** | **2/2** |
+| Stage-2 T3 (short horizon) | 0/2 (1 todo, wrong item completed) | 0/2 (1 todo, wrong item completed) |
+| Stage-2 e2e T2 | 11.1 s | 15.4 s |
+| Stage-3 real-work success | **0/6** | **0/6** |
+| Stage-3 wall per task (median) | 65 s | 228 s |
+| Stage-3 per-turn p50 / p95 | 3.41 s / 3.68 s | 17.8 s / 20.9 s |
+| Cold load | 4.1 s | 5.5 s |
+| Process RSS (peak) | 4.7 GB | 10.4 GB |
+| Accelerator peak (MLX) | 7.2 GB | 11.6 GB |
+| Failure modes | never terminates on live-site audit tasks; one wrong finding | never terminates on live-site audit tasks |
+
+### 5.2 Where the difference does and does not show up
+
+- **Grounding: no difference.** Both hit 8/8 with valid parses and `finish_reason=stop`.
+  Extra capacity buys nothing on the 8-scene screen.
+- **T1/T2: no difference.** Both clear the one-step and input+commit tasks, 2/2.
+- **T3: no difference.** Both fail, and for the *same* reason — after one todo the model
+  commits the wrong item and takes the wrong branch; 9B is not closer to passing.
+- **Stage 3: no difference in outcome, large difference in cost.** Both score 0/6 on the
+  stratified real-work set. The binding limit is **architectural, not capacity**: Fara's
+  action space has no JS-eval and no DOM primitive, so live-site tasks whose ground truth
+  is recomputed from page scripts (`porsche-uk-script-inventory`, `puma-uk-*`,
+  `rajeevg-*`, `tldraw`) are out of reach for *any* Fara artifact — the model emits a
+  visual click stream and never a `window.__bench_finding`. 9B simply spends **3.5× the
+  wall time** (228 s vs 65 s per task) and **2.3× the memory** (11.6 GB vs 7.2 GB) to
+  reach the same zero.
+
+### 5.3 Delegation frontier
+
+| Task class | Fara 4B | Fara 9B | ShowUI/TongUI role | Strong planner required? | Default route | Escalation condition |
+|---|---|---|---|---|---|---|
+| Grounding "where is X" | 8/8, 2.5 s | 8/8, 4.4 s | ShowUI-2B actor/grounder (fastest, 2.25 GB) | No | **Fara-4B or ShowUI-2B, local** | target dense/small → retest TongUI-7B/UGround-7B |
+| Actor (low-level action, given subgoal) | T1 2/2 | T1 2/2 | ShowUI-2B native nav prompt | No (planner supplies subgoal) | **ShowUI-2B actor** | point misses on dense UI |
+| Short deterministic multi-step (T1/T2) | 2/2 | 2/2 | — | No for T1/T2 | **Fara-4B, local** | horizon >2 or stateful → planner |
+| Short horizon / stateful (T3) | 0/2 | 0/2 | — | **Yes** | **local actor + strong planner** | any multi-item state task |
+| Real-work retrieval/audit (live site, DOM truth) | 0/6 | 0/6 | — | **Yes** | **strong planner** (harness has eval) + local actor | never route bare Fara here |
+| Commerce/consent flow (live site) | 0/6 | 0/6 | — | **Yes** | **strong planner** | never route bare Fara here |
+
+### 5.4 Routing / escalation policy
+
+1. **Local-first for one-shot pointing and ≤2-step deterministic actions.** Fara-4B
+   grounds 8/8 and clears T1/T2; ShowUI-2B is the cheapest credible actor. Route those
+   locally — no frontier call.
+2. **Add a strong planner the moment the task is stateful, multi-item, or live-site.**
+   T3 = 0/2 for both Fara sizes, and every real-work task is 0/6, because the failure is
+   the missing eval/planning channel, not perception. The planner (Codex/GLM/Kimi) owns
+   the loop and the DOM read; the local model owns the pixel action.
+3. **Do not escalate 4B→9B to buy success.** Across all three stages 9B matched 4B's
+   outcome at 1.8–3.5× the latency and 1.6–2.3× the memory. There is no task in this
+   screen where the extra 5B parameters flipped a result. Escalate *up the stack to a
+   planner*, not *up the Fara sizes*.
+
+### 5.5 Decision
+
+**Fara1.5-9B is NOT worth integrating as a default, and is NOT a useful escalation tier
+behind Fara-4B. It is a redundant, strictly-costlier sibling.**
+
+Evidence: identical 8/8 grounding, identical 2/2 on T1/T2, identical 0/2 on T3, identical
+0/6 on the stratified real-work set — while consuming 2.3× the RSS, 1.6× the MLX peak and
+1.8–3.5× the latency (Stage-3 median wall 228 s vs 65 s). The one axis where a larger
+Fara could plausibly help — longer, stateful, real-work delegation — is blocked by the
+family's missing eval/plan primitive, which capacity cannot fix. Keep **Fara-4B** as the
+local grounder/agent and **ShowUI-2B** as the local actor; spend the escalation budget on
+a strong planner that owns the DOM loop.
+
+### 5.6 Frontier calls/tokens avoided (estimate, where computable)
+
+Computed from this run's task counts, i.e. the local work that did **not** need a
+frontier call:
+
+- Stage 1: 8 scenes × 2 models = **16 grounding calls** served locally.
+- Stage 2: 3 tasks × 2 reps × 2 models = **12 end-to-end task runs**; 8 were served
+  locally end-to-end (T1/T2, both models); 4 (T3) still need a planner.
+- Stage 3: 6 tasks × 2 models = **12 real-work runs**; **0** served locally (all need
+  the planner's eval loop), so 0 frontier calls avoided here.
+- **Net: ~24 frontier grounding/action calls avoided per 4B+9B sweep.** At Fara-4B's
+  ~120-160 prompt+gen tokens per turn these are small in tokens but material in
+  round-trips: every avoided call is one fewer frontier turn of ~2-4 s plus ~1 k
+  tokens. The 9B adds no avoided calls over the 4B, so it contributes **zero marginal
+  frontier savings** while doubling local compute.
+
+### 5.7 Stage-3 set and reproducibility
+
+The corpus (`/Users/rajeev/Code/web-automation-microbench/bench-ext/corpus/tasks/*.json`)
+is **live-site with no vendored fixtures** — all 11 tasks fetch a real URL and verify via
+their own `verify_js` + `pass_rule.py`. The stratified set chosen for class coverage
+(not to favour either size) and its stratum:
+
+| Task | Stratum | Reachable offline? |
+|---|---|---|
+| `porsche-uk-script-inventory` | 1 simple retrieve | no (live) |
+| `gymshark-uk-add-to-cart-tag-check` | 2 form/commerce | no (live) |
+| `tldraw-three-shape-diagram` | 3 short deterministic multi-step | no (live) |
+| `rajeevg-crawlability-audit` | 4 longer/stateful | no (live) |
+| `puma-uk-seo-metadata-audit` | 5 ambiguous/multi-field | no (live) |
+| `puma-uk-tag-inspection` | 2 form/commerce | no (live) |
+| `chanel-gb-pdp-tag-inspection` | 1 simple retrieve | no (live, 403 to plain fetch) |
+
+Scoring uses the corpus's own verifier: `run_stage3.py` navigates with
+`wait_until=domcontentloaded`, replays one model action per turn under the common
+Playwright executor, then evaluates the task's `verify_js` and hands `{truth, finding}`
+to `pass_rule.evaluate`. The relay is identical for both models, so the comparison is
+fair. A negative result here is the honest outcome and is not tuned away.
+
+```bash
+.venv/bin/python -m harness.run_stage1 fara    --warm-reps 3
+.venv/bin/python -m harness.run_stage1 fara9b --warm-reps 3
+.venv/bin/python -m harness.run_stage2 fara    --reps 2
+.venv/bin/python -m harness.run_stage2 fara9b --reps 2
+.venv/bin/python -m harness.run_stage3 fara    --max-steps 14
+.venv/bin/python -m harness.run_stage3 fara9b --max-steps 14
+```
