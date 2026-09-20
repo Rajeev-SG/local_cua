@@ -1,0 +1,85 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "ui-creation",
+    "canvas-tool",
+    "structural-verification",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": null,
+  "deterministic_evidence": {
+    "detail": "shape count, labels, bounds and overlap are recomputed from the live DOM",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-ae59a4a30dffdb76",
+  "hidden_tests": null,
+  "instruction": "Open tldraw. Create three rectangles and label them exactly Runner, Browser and Verifier, placed left to right, then connect them with two arrows (Runner->Browser, Browser->Verifier). Node regions must not overlap. Then record your result by setting window.__bench_finding with ONE eval to a JSON object: {\"labels\": [the text of each rectangle, left to right], \"nodes\": [{\"label\": \"<label>\", \"x\": <left>, \"y\": <top>, \"w\": <width>, \"h\": <height>}, ...], \"arrows\": <number of arrow shapes>, \"overlap\": <true if any two node rectangles overlap, else false>}. Finish only after window.__bench_finding is set.",
+  "objective": "On a fresh tldraw whiteboard, build a three-node left-to-right flow: rectangles labelled Runner, Browser and Verifier in that order, joined by two arrows, with no overlapping node regions.",
+  "observation_js": null,
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "open tldraw in a fresh browser context, which creates an empty board; no account, no login",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "909e3eb7191f67273a1cfb5ed92106c131dba87686e66fae7202c58bf5900ce1",
+    "source_url": "https://www.tldraw.com/",
+    "verified_against": "the live canvas holds exactly three geo shapes labelled Runner/Browser/Verifier left to right, two arrow shapes, and no overlapping node rectangles, and the agent's finding matches"
+  },
+  "raw_task_statement": "Repeat the already-proven tldraw creation flow once in a fresh isolated session: Create Runner, Browser, Verifier rectangles and two arrows; select all, export SVG, then parse/verify the SVG (exact labels, 3 non-overlapping rectangular node regions, 2 arrow paths).",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "tldraw-three-shape-diagram",
+  "url": "https://www.tldraw.com/",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Recomputes the shape structure from the live canvas DOM (types, labels, bounds, overlap) and compares it to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "expected_arrows": 2,
+      "expected_labels": [
+        "Runner",
+        "Browser",
+        "Verifier"
+      ],
+      "kind": "structural",
+      "require_no_overlap": true
+    },
+    "test_command": null,
+    "verify_js": "(()=>{const shapes=[...document.querySelectorAll('.tl-shape')];const geo=shapes.filter(s=>s.getAttribute('data-shape-type')==='geo');const arrows=shapes.filter(s=>s.getAttribute('data-shape-type')==='arrow');const nodes=geo.map(s=>{const r=s.getBoundingClientRect();return {label:(s.innerText||'').trim(),x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)};});const order=[...nodes].sort((a,b)=>a.x-b.x).map(n=>n.label);let overlap=false;for(let i=0;i<nodes.length;i++){for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];if(a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h)overlap=true;}}let f=null;try{f=window.__bench_finding||null;}catch(e){}return JSON.stringify({url:location.href,truth:{labels:order,nodes:nodes,arrows:arrows.length,overlap:overlap},finding:f});})()"
+  }
+}

@@ -75,8 +75,17 @@ class Executor:
                 self._pw.stop()
 
     # ---- navigation ----
-    def goto(self, url: str) -> None:
-        self.page.goto(url, wait_until="load")
+    def goto(self, url: str, wait_until: str = "load",
+             timeout_ms: int | None = None) -> None:
+        """Navigate and settle.
+
+        Local fixtures fire `load` immediately, so the default is unchanged.
+        Live sites (real-work tasks) never reach a quiet `load` inside a sane
+        budget — third-party analytics keep the load event pending — so those
+        callers pass `wait_until="domcontentloaded"` plus a longer timeout.
+        """
+        self.page.goto(url, wait_until=wait_until,
+                       timeout=timeout_ms or 8000)
         self.settle()
 
     def settle(self) -> None:
@@ -168,10 +177,19 @@ class Executor:
         self.page.select_option(selector, value)
         return StepResult(True, (time.perf_counter() - t0) * 1000, "select")
 
-    def navigate(self, url: str) -> StepResult:
+    def navigate(self, url: str, wait_until: str = "load",
+                 timeout_ms: int | None = None) -> StepResult:
         t0 = time.perf_counter()
-        self.goto(url)
+        self.goto(url, wait_until=wait_until, timeout_ms=timeout_ms)
         return StepResult(True, (time.perf_counter() - t0) * 1000, f"goto({url})")
+
+    def eval_js(self, expression: str):
+        """Run a verification expression in the page (harness-side truth only).
+
+        Used by the real-work runner to recompute the corpus task's objective
+        end state; models never get this — Fara's action space has no eval.
+        """
+        return self.page.evaluate(expression)
 
     def back(self) -> StepResult:
         t0 = time.perf_counter()

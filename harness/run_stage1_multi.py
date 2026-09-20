@@ -44,7 +44,8 @@ def run(model_key, mode, warm_reps=3, scenes=None):
                         "parse_ok": pred.parse_ok, "parse_ms": round(pred.parse_ms, 3),
                         "inference_ms": round(pred.inference_ms, 3),
                         "inference_ms_samples": [round(t, 3) for t in times],
-                        "parse_error": pred.parse_error})
+                        "parse_error": pred.parse_error,
+                        "generation": pred.extra})
             pt = pred.point or (pred.action.x, pred.action.y)
             if pt[0] is not None and meta["bbox"]:
                 sc = score_point(pt[0], pt[1], meta["bbox"])

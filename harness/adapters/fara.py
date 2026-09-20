@@ -25,7 +25,7 @@ knowledge cutoff is limited to early 2026, so you may not be aware of \
 events or developments that occurred after that time, without explicitly \
 browsing and searching for latest information on the web.
 
-This edition of the model was trained using SFT on top of Qwen3.5-4B, \
+This edition of the model was trained using SFT on top of {backbone}, \
 using a synthetic data mixture generated and developed by Microsoft AI Frontiers."""
 
 CRITICAL_POINTS = """\
@@ -65,7 +65,16 @@ _ACTIONS = ["key", "type", "mouse_move", "left_click", "left_click_drag",
             "pause_and_memorize_fact", "ask_user_question", "wait", "terminate"]
 
 
-def build_system_prompt(width: int, height: int) -> str:
+def build_system_prompt(width: int, height: int,
+                        backbone: str = "Qwen3.5-4B") -> str:
+    """Microsoft's verbatim Fara system prompt + `computer_use` tool schema.
+
+    `backbone` only changes the one sentence of the identity block that names
+    the SFT base model ("This edition of the model was trained using SFT on top
+    of Qwen3.5-<N>B"). Both published model cards are otherwise identical, and
+    each card names its own backbone, so passing the wrong one would hand the
+    model a prompt that contradicts its training.
+    """
     desc = f"""
 Use a mouse and keyboard to interact with a computer, and take screenshots.
 * This is an interface to a desktop GUI. You do not have access to a terminal or applications menu. You must click on desktop icons to start applications.
@@ -99,7 +108,7 @@ Use a mouse and keyboard to interact with a computer, and take screenshots.
             },
         },
     }
-    return (IDENTITY + "\n\n" + CRITICAL_POINTS + "\n\n" +
+    return (IDENTITY.format(backbone=backbone) + "\n\n" + CRITICAL_POINTS + "\n\n" +
             FN_CALL_FORMAT.replace("__TOOL_DESCS__", json.dumps(tool_json)))
 
 
@@ -111,12 +120,14 @@ class FaraAdapter(Adapter):
     artifact = "runanywhere/Fara1.5-4B-mlx-4bit"
     runtime = "mlx-vlm"
     quant = "4bit (vision tower bf16)"
+    backbone = "Qwen3.5-4B"
+    max_tokens = 512
 
     def load(self):
         from mlx_vlm import load
         self.model, self.processor = load(self.artifact)
         self.system_prompt = build_system_prompt(
-            self.viewport["width"], self.viewport["height"])
+            self.viewport["width"], self.viewport["height"], self.backbone)
 
     def predict(self, image_path, instruction, history=None):
         from mlx_vlm import generate
@@ -127,19 +138,44 @@ class FaraAdapter(Adapter):
         prompt = template_prompt(self.processor, self.artifact, prompt)
         t0 = time.perf_counter()
         res = generate(self.model, self.processor, prompt, image=image_path,
-                       max_tokens=512, temperature=0.0)
+                       max_tokens=self.max_tokens, temperature=0.0)
         infer_ms = (time.perf_counter() - t0) * 1000
         text = res.text if hasattr(res, "text") else str(res)
 
         t1 = time.perf_counter()
         action, err = parse_fara(text, self.viewport)
         parse_ms = (time.perf_counter() - t1) * 1000
+        # Generation stats are kept so a truncated chain-of-thought (which shows
+        # up as a parse failure, not as a model mistake) is visible in the rows.
+        extra = {
+            "gen_tokens": getattr(res, "generation_tokens", None),
+            "prompt_tokens": getattr(res, "prompt_tokens", None),
+            "finish_reason": getattr(res, "finish_reason", None),
+            "gen_tps": round(getattr(res, "generation_tps", 0.0) or 0.0, 2),
+            "truncated": getattr(res, "finish_reason", None) == "length",
+        }
         return Prediction(
             model=self.name, native_text=text, action=action,
             parse_ok=err is None, parse_ms=parse_ms, inference_ms=infer_ms,
             point=(action.x, action.y) if action.x is not None else None,
-            parse_error=err,
+            parse_error=err, extra=extra,
         )
+
+
+@register("fara9b")
+class Fara9BAdapter(FaraAdapter):
+    """Fara1.5-9B, 8-bit MLX, same native prompt / schema / coordinate contract.
+
+    Route chosen after the `mlx-community/Fara1.5-9B-OptiQ-4bit` vision path was
+    rejected under mlx-vlm (see RESULTS.md / scripts/check_optiq_vision.py); this
+    artifact uses the standard mlx-vlm Qwen3.5-VL layout, so the only change
+    versus the 4B adapter is the artifact, the name, the quant label, and the
+    backbone named in the identity block.
+    """
+    name = "Fara1.5-9B"
+    artifact = "mlx-community/Fara1.5-9B-8bit"
+    quant = "8bit"
+    backbone = "Qwen3.5-9B"
 
 
 def parse_fara(text: str, viewport: dict):

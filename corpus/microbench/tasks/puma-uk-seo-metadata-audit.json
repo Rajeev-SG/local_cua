@@ -1,0 +1,104 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "seo-audit",
+    "head-metadata",
+    "structured-data",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": {
+    "derived_from": [
+      "74188614ff828e0f6f948fbce0e9a0136609d6003bfabe86e97aceb4545a138e"
+    ],
+    "fidelity": "derived-variant",
+    "rationale": "The programmatic-SEO assessment work inspected a site's head metadata and schema markup to decide what could be reintroduced without hurting focus. The capability is the same on any page.",
+    "seed_task": "rajeevg-programmatic-seo-assessment",
+    "varied": [
+      "target page: a large commercial homepage",
+      "schema: Corporation + WebSite markup rather than Person"
+    ]
+  },
+  "deterministic_evidence": {
+    "detail": "metadata is recomputed from the live DOM at verify time",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-f91ab0fcd58c7be7",
+  "hidden_tests": null,
+  "instruction": "Open the PUMA UK homepage. Inspect the LIVE page head and structured data, then record your finding by setting window.__bench_finding with ONE eval to a JSON object with exactly these keys: {\"canonical\": the href of link[rel=canonical] or null, \"ogTitle\": the content of meta[property='og:title'] or null, \"ogType\": the content of meta[property='og:type'] or null, \"hasOgImage\": true if meta[property='og:image'] has content, \"hasH1\": true if the page has an h1 element with text, \"jsonldTypes\": [every distinct schema.org @type declared in script[type='application/ld+json'] blocks, sorted]}. Do not change the page. Finish only after window.__bench_finding is set.",
+  "objective": "On the live PUMA UK homepage, record the page's search-facing head metadata and structured data: canonical URL, Open Graph title and type, whether an Open Graph image and an h1 are present, and the set of schema.org @type values declared in JSON-LD.",
+  "observation_js": null,
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "navigate to the public homepage in a fresh browser context; no account, no login",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "74188614ff828e0f6f948fbce0e9a0136609d6003bfabe86e97aceb4545a138e",
+    "source_url": "https://uk.puma.com/uk/en",
+    "verified_against": "window.__bench_finding matches the recomputed head metadata and JSON-LD @type set for the live page"
+  },
+  "raw_task_statement": "can we look at bringing back some of the programmatic seo stuff on Rajeevg.com ... Don't make any changes yet, just assess what we can reintroduce whilst still keeping the site clean and focused like it is now",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "puma-uk-seo-metadata-audit",
+  "url": "https://uk.puma.com/uk/en",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Independent recomputation of the head metadata and JSON-LD types from the live DOM, compared to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "exact_fields": [
+        "canonical",
+        "ogTitle",
+        "ogType"
+      ],
+      "fields": [
+        "jsonldTypes"
+      ],
+      "kind": "finding_matches_truth",
+      "presence_fields": [
+        "hasOgImage",
+        "hasH1"
+      ],
+      "url_fields": [
+        "canonical"
+      ]
+    },
+    "test_command": null,
+    "verify_js": "(()=>{const meta=n=>{const m=document.querySelector('meta[name=\"'+n+'\"]')||document.querySelector('meta[property=\"'+n+'\"]');return m?(m.getAttribute('content')||''):null};const canon=document.querySelector('link[rel=\"canonical\"]');const types=[...document.querySelectorAll('script[type=\"application/ld+json\"]')].flatMap(s=>{try{const d=JSON.parse(s.textContent);return Array.isArray(d)?d:[d]}catch(e){return[]}}).map(d=>d&&d['@type']).flat().filter(Boolean);const h1=document.querySelector('h1');let f=null;try{f=window.__bench_finding||null;}catch(e){}return JSON.stringify({url:location.href,truth:{canonical:canon?canon.getAttribute('href'):null,ogTitle:meta('og:title'),ogType:meta('og:type'),hasOgImage:!!meta('og:image'),hasH1:!!(h1&&h1.innerText.trim()),jsonldTypes:[...new Set(types)].sort()},finding:f});})()"
+  }
+}

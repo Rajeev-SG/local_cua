@@ -1,0 +1,100 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "tag-inspection",
+    "dom-script-audit",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": {
+    "derived_from": [
+      "01a06c82-ce79-7000-a1e3-7b370c7f0359"
+    ],
+    "fidelity": "derived-variant",
+    "rationale": "The rig routinely inspects which marketing tags a live page carries (CHANEL GB/FR/US via authenticated Chrome, and public sites). The capability is the same on any site; only the page differs.",
+    "seed_task": "chanel-gb-pdp-tag-inspection",
+    "varied": [
+      "target page: a different public retail homepage",
+      "tag container: two GTM containers (GTM-5WWF665, GTM-TSWKBGX3) rather than one"
+    ]
+  },
+  "deterministic_evidence": {
+    "detail": "tag truth is recomputed from the live DOM at verify time",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-1f0ebae6e69a5cd2",
+  "hidden_tests": null,
+  "instruction": "Open the PUMA UK homepage. Inspect the LIVE page (page HTML, script tags, window globals) for marketing tags, then record your finding by setting window.__bench_finding with ONE eval to a JSON object with exactly these keys: {\"gtm\": [every GTM container id found anywhere in the page, each matching /GTM-[A-Z0-9]+/], \"aw\": [every Google Ads id matching /AW-[0-9]{6,}/], \"pinterest\": true if a Pinterest tag is present (window.pintrk is defined, or a ct.pinterest.com / pintrk reference exists), else false}. Do not change the page. Finish only after window.__bench_finding is set.",
+  "objective": "On the live PUMA UK homepage, record which marketing tags the page actually carries: the GTM container id set, Google Ads (AW-) ids and Pinterest tag presence.",
+  "observation_js": null,
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "navigate to the public homepage in a fresh browser context; no account, no login, no prior state",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "01a06c82-ce79-7000-a1e3-7b370c7f0359",
+    "source_url": "https://uk.puma.com/uk/en",
+    "verified_against": "window.__bench_finding matches the independently recomputed tag ground truth for the live page (GTM container id set, Google Ads AW- id set, Pinterest presence)"
+  },
+  "raw_task_statement": "please complete the production QA of the google ads tags ... ideally we want to confirm every tag is working ... I have all the relevant chanel website tabs open in my omc chrome profile ... please connect to it and use playwriter to complete the QA",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "puma-uk-tag-inspection",
+  "url": "https://uk.puma.com/uk/en",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Independent recomputation of the tag ground truth from the live page, compared to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "fields": [
+        "gtm",
+        "aw"
+      ],
+      "kind": "finding_matches_truth",
+      "presence_fields": [
+        "pinterest"
+      ],
+      "require_any_of": [
+        "gtm",
+        "aw",
+        "pinterest"
+      ]
+    },
+    "test_command": null,
+    "verify_js": "(()=>{const html=document.documentElement.innerHTML;const gtm=[...new Set(html.match(/GTM-[A-Z0-9]+/g)||[])].sort();const aw=[...new Set(html.match(/AW-[0-9]{6,}/g)||[])].sort();const pinterest=(typeof window.pintrk!=='undefined')||/ct\\.pinterest\\.com|pintrk/i.test(html);let f=null;try{f=window.__bench_finding||null;}catch(e){}return JSON.stringify({url:location.href,truth:{gtm:gtm,aw:aw,pinterest:pinterest},finding:f});})()"
+  }
+}

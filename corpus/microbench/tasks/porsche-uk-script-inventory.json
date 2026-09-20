@@ -1,0 +1,94 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "vendor-inventory",
+    "dom-script-audit",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": {
+    "derived_from": [
+      "d0b7b16127b58029f55297eac5c5a26c2924198d0d5403bd6066837fed9e1677"
+    ],
+    "fidelity": "derived-variant",
+    "rationale": "The tag-QA work did static extraction from browser-loaded tag runtime files to establish which vendor domains were actually supplying executable scripts. The capability is site-independent.",
+    "seed_task": "chanel-google-ads-static-runtime-extraction",
+    "varied": [
+      "target page: a different public brand homepage",
+      "vendor set: 3 script hosts including a consent CDN"
+    ]
+  },
+  "deterministic_evidence": {
+    "detail": "the host set is recomputed from the live DOM at verify time",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-dc9963633c78a157",
+  "hidden_tests": null,
+  "instruction": "Open the Porsche UK homepage. Inspect the LIVE page and list every distinct hostname that supplies an executable script (a script element with a src attribute), counting the site's own host once if it serves scripts itself. Record your finding by setting window.__bench_finding with ONE eval to a JSON object with exactly this key: {\"hosts\": [each distinct hostname, sorted]}. Do not change the page. Finish only after window.__bench_finding is set.",
+  "objective": "On the live Porsche UK homepage, inventory which domains actually serve executable scripts to the page.",
+  "observation_js": null,
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "navigate to the public homepage in a fresh browser context; no account, no login",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "d0b7b16127b58029f55297eac5c5a26c2924198d0d5403bd6066837fed9e1677",
+    "source_url": "https://www.porsche.com/uk/",
+    "verified_against": "window.__bench_finding.hosts equals the hostname set recomputed from the live page's script[src] elements"
+  },
+  "raw_task_statement": "Audit the already-open Chanel USA, France, and UK website tabs for Google Ads tags specifically, using both static extraction from browser-loaded GTM/Google tag runtime files and runtime network observation.",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "porsche-uk-script-inventory",
+  "url": "https://www.porsche.com/uk/",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Independent recomputation of the script-supplying host set from the live DOM, compared to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "fields": [
+        "hosts"
+      ],
+      "kind": "finding_matches_truth",
+      "require_any_of": [
+        "hosts"
+      ]
+    },
+    "test_command": null,
+    "verify_js": "(()=>{const host=u=>{try{return new URL(u,location.href).hostname}catch(e){return null}};const hosts=[...new Set([...document.querySelectorAll('script[src]')].map(s=>host(s.getAttribute('src'))).filter(Boolean))].sort();let f=null;try{f=window.__bench_finding||null;}catch(e){}return JSON.stringify({url:location.href,truth:{hosts:hosts},finding:f});})()"
+  }
+}

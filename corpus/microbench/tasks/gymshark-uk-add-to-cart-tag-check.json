@@ -1,0 +1,103 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "consent-handling",
+    "commerce-flow",
+    "add-to-cart",
+    "tag-inspection",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": {
+    "derived_from": [
+      "01a06c82-ce79-7000-a1e3-7b370c7f0359"
+    ],
+    "fidelity": "derived-variant",
+    "rationale": "same capability as the CHANEL add-to-bag QA: accept consent, find a purchasable product, add it, and check the marketing tags that fire around the add",
+    "seed_task": "chanel-gb-add-to-bag-tag-check",
+    "varied": [
+      "target: a different retailer reachable by the benchmark browser",
+      "tag evidence: the set of marketing-tag hosts loaded after the add, from resource timing",
+      "start point: a product listing page rather than a single PDP"
+    ]
+  },
+  "deterministic_evidence": {
+    "detail": "cart count from the site's own cart state; tag hosts from the browser's resource timing",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-2ca1bf9061c272da",
+  "hidden_tests": null,
+  "instruction": "You are on the Gymshark UK product listing. Steps: (1) accept the cookie banner if shown; (2) click through to any one purchasable product; (3) select an available size using the size control (its text may include a suffix, e.g. \"M (10-12)\" or \"UK 9\"); (4) set window.__bench_marker = performance.now() IMMEDIATELY before clicking add-to-cart, then click add-to-cart once; (5) wait about 5 seconds for the cart and tags to settle - do NOT re-click or re-poll repeatedly; (6) in ONE eval set window.__bench_report_at = performance.now() and window.__bench_finding to a JSON object with exactly these keys: {\"consentAccepted\": true if you accepted the banner, \"productTitle\": the product you added, \"cartItemCount\": the number of items now in the cart (read it from the \\\"cart\\\" field of your most recent observation after adding; it changes from 0/empty to the new count), \"tagsAfterAdd\": [every distinct hostname of a marketing tag (Google/GTM, DoubleClick/Floodlight, Facebook, TikTok, Snapchat, Pinterest, Criteo, Clarity and similar) that loaded between your marker and report time, sorted]}. Do not enter payment or checkout. Finish only after window.__bench_finding is set.",
+  "objective": "On Gymshark UK: accept consent, find a purchasable product, add it to the cart, and record which marketing tags fired at or after the add-to-cart action.",
+  "observation_js": "JSON.stringify({url:location.href,title:document.title.slice(0,60),products:[...document.querySelectorAll('a[href*=\"/products/\"]')].map(a=>a.href).filter((v,i,s)=>s.indexOf(v)===i).slice(0,12),buttons:[...document.querySelectorAll('button,a[role=button]')].filter(b=>b.getClientRects().length).map(b=>(b.innerText||'').trim()).filter(Boolean).slice(0,25),sizes:[...document.querySelectorAll('label,button,li')].filter(e=>e.getClientRects().length&&!/restock|unavailable|disabled|sold/i.test((e.className||'').toString()+(e.getAttribute('aria-disabled')||''))&&!(e.querySelector&&e.querySelector('input[disabled]'))).map(e=>(e.innerText||'').trim().replace(/\\s+/g,' ')).filter(t=>t.length<=18&&/^(UK|US|EU)? ?\\d{1,2}(\\.5)?( ?\\([\\d\\-\\u2013]+\\))?$|^(XXS|XS|S|M|L|XL|XXL|2XL|3XL)( ?\\([\\d\\-\\u2013]+\\))?$/i.test(t)).slice(0,16),cart:((document.querySelector('[data-testid=\"header-miniBagCount-read\"]')||{}).textContent||null)})",
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "fresh browser context; the cart is per-session, so there is no external state to reset",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "01a06c82-ce79-7000-a1e3-7b370c7f0359",
+    "source_url": "https://uk.gymshark.com/collections/all-products",
+    "verified_against": "the site's own cart state holds the item the agent added, consent was accepted, and at least one marketing-tag host loaded after the add-to-cart marker - all recomputed from the live page and the browser's resource timing, never from the agent's own report"
+  },
+  "raw_task_statement": "CHANEL production QA matrix (verbatim steps): '2. Accept the cookie banner', '3. Google Ads - Conversion - Add to Bag - FnB+FSH | Add to cart on FnB PDP | On the FnB PDP, click Add to bag; watch the uaevent add to cart', plus the buyable-product screen \"if (r.ctas.some(t => /ADD TO BAG/.test(t)))\".",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "gymshark-uk-add-to-cart-tag-check",
+  "url": "https://uk.gymshark.com/collections/all-products",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Recomputes the cart count from the site's own cart state and the marketing-tag hosts that loaded between the agent's pre-add marker and its report time; compares both to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "exact_fields": [
+        "cartItemCount"
+      ],
+      "fields": [
+        "tagsAfterAdd"
+      ],
+      "kind": "finding_matches_truth",
+      "presence_fields": [
+        "consentAccepted"
+      ],
+      "require_any_of": [
+        "tagsAfterAdd"
+      ]
+    },
+    "test_command": null,
+    "verify_js": "(async()=>{const V=/pinterest|doubleclick|google-analytics|analytics\\\\.google|googletagmanager|googleadservices|facebook|adform|tiktok|snapchat|criteo|clarity|hotjar|bat\\\\.bing/i;const marker=window.__bench_marker||0,report=window.__bench_report_at||performance.now();const tagsAfterAdd=[...new Set(performance.getEntriesByType('resource').filter(r=>r.startTime>marker&&r.startTime<=report).map(r=>{try{return new URL(r.name).hostname}catch(e){return null}}).filter(h=>h&&V.test(h)))].sort();const consentSignal=[document.cookie,Object.keys(localStorage).join(' '),Object.keys(sessionStorage).join(' ')].join(' ');const consentAccepted=/consent|optanon|onetrust|usercentrics|osano|klaro|didomi|cookieyes/i.test(consentSignal);const el=document.querySelector('[data-testid=\"header-miniBagCount-read\"]');const cartItemCount=el?parseInt((el.textContent||\"\").replace(/[^0-9]/g,\"\"),10):0;let f=null;try{f=window.__bench_finding||null}catch(e){}return JSON.stringify({url:location.href,truth:{consentAccepted:consentAccepted,cartItemCount:cartItemCount,tagsAfterAdd:tagsAfterAdd},finding:f});})()"
+  }
+}

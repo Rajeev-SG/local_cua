@@ -1,0 +1,101 @@
+{
+  "blocked_reason": null,
+  "capabilities": [
+    "crawlability",
+    "robots-txt",
+    "sitemap",
+    "real-site"
+  ],
+  "definition_schema": "pareto-research-task-definition/v1",
+  "definition_version": 1,
+  "derivation": {
+    "derived_from": [
+      "74188614ff828e0f6f948fbce0e9a0136609d6003bfabe86e97aceb4545a138e"
+    ],
+    "fidelity": "derived-variant",
+    "rationale": "The same SEO assessment work checked whether a site declares its sitemap and whether that sitemap is usable. The capability is site-independent.",
+    "seed_task": "rajeevg-crawlability-assessment",
+    "varied": [
+      "target page: the site the SEO assessment was about"
+    ]
+  },
+  "deterministic_evidence": {
+    "detail": "robots.txt and sitemap.xml are re-fetched at verify time",
+    "kind": "page-recomputed-ground-truth"
+  },
+  "enrichment": [],
+  "evidence_type": "observed",
+  "fields_provenance": {
+    "blocked_reason": "deterministic",
+    "capabilities": "deterministic",
+    "definition_schema": "deterministic",
+    "definition_version": "deterministic",
+    "derivation": "deterministic",
+    "deterministic_evidence": "deterministic",
+    "evidence_type": "deterministic",
+    "fields_provenance": "deterministic",
+    "hidden_tests": "deterministic",
+    "instruction": "deterministic",
+    "objective": "deterministic",
+    "observation_js": "deterministic",
+    "observed_difficulty": "deterministic",
+    "pre_state": "deterministic",
+    "prerequisite": "deterministic",
+    "provenance": "deterministic",
+    "raw_task_statement": "deterministic",
+    "schema": "deterministic",
+    "secret_dependency": "deterministic",
+    "solution": "deterministic",
+    "task_class": "deterministic",
+    "task_id": "deterministic",
+    "url": "deterministic",
+    "verification": "deterministic"
+  },
+  "fingerprint": "fp-ef2b2aea375f9633",
+  "hidden_tests": null,
+  "instruction": "Open the rajeevg.com homepage. From that page, fetch /robots.txt and /sitemap.xml (same origin), then record your finding by setting window.__bench_finding with ONE eval to a JSON object with exactly these keys: {\"robotsPresent\": true if /robots.txt responded ok, \"robotsSitemaps\": [every Sitemap: URL declared in robots.txt, absolute and sorted], \"sitemapUrlCount\": the number of <loc> entries in the sitemap XML, \"allSameHost\": true if every <loc> entry is on the site's own hostname}. Do not change the site. Finish only after window.__bench_finding is set.",
+  "objective": "On the live rajeevg.com, verify the site's crawlability declarations: does robots.txt exist, which sitemap URLs does it declare, how many URLs does the sitemap list, and are all of them on the site's own host?",
+  "observation_js": null,
+  "observed_difficulty": null,
+  "pre_state": {
+    "detail": "navigate to the public homepage in a fresh browser context; no account, no login",
+    "kind": "fresh-page-load"
+  },
+  "prerequisite": {},
+  "problem_statement": null,
+  "provenance": {
+    "source_session_id": "74188614ff828e0f6f948fbce0e9a0136609d6003bfabe86e97aceb4545a138e",
+    "source_url": "https://rajeevg.com/",
+    "verified_against": "window.__bench_finding matches the recomputed robots.txt declarations and sitemap entry count for the live site"
+  },
+  "raw_task_statement": "can we look at bringing back some of the programmatic seo stuff on Rajeevg.com ... just assess what we can reintroduce whilst still keeping the site clean and focused",
+  "schema": "pareto-research-task/v1",
+  "secret_dependency": null,
+  "semantic_difficulty": null,
+  "solution": null,
+  "task_class": "web-automation",
+  "task_id": "rajeevg-crawlability-audit",
+  "url": "https://rajeevg.com/",
+  "verification": {
+    "authority": "page-recomputed",
+    "description": "Independent recomputation of the crawlability facts by fetching robots.txt and sitemap.xml from the live page, compared to the agent's window.__bench_finding.",
+    "pass_rule": {
+      "exact_fields": [
+        "sitemapUrlCount"
+      ],
+      "fields": [
+        "robotsSitemaps"
+      ],
+      "kind": "finding_matches_truth",
+      "presence_fields": [
+        "robotsPresent",
+        "allSameHost"
+      ],
+      "require_any_of": [
+        "robotsPresent"
+      ]
+    },
+    "test_command": null,
+    "verify_js": "(async()=>{const abs=u=>{try{return new URL(u,location.href).href}catch(e){return null}};let robots=null;let sitemaps=[];let urls=[];let sameHost=null;let err=null;try{const r=await fetch('/robots.txt',{cache:'no-store'});robots=r.ok?await r.text():null;if(robots){sitemaps=[...new Set([...robots.matchAll(/Sitemap:\\s*(\\S+)/gi)].map(m=>abs(m[1])).filter(Boolean))].sort()}}catch(e){err='robots:'+e}try{const s=await fetch('/sitemap.xml',{cache:'no-store'});const t=s.ok?await s.text():'';urls=[...new Set([...t.matchAll(/<loc>\\s*([^<\\s]+)\\s*<\\/loc>/gi)].map(m=>m[1].trim()))];sameHost=urls.length?urls.every(u=>{try{return new URL(u).hostname===location.hostname}catch(e){return false}}):null}catch(e){err=(err||'')+' sitemap:'+e}let f=null;try{f=window.__bench_finding||null;}catch(e){}return JSON.stringify({url:location.href,truth:{robotsPresent:!!robots,robotsSitemaps:sitemaps,sitemapUrlCount:urls.length,allSameHost:sameHost},finding:f,error:err});})()"
+  }
+}
