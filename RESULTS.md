@@ -189,7 +189,8 @@ comparison in the repo: **one variable, capacity (4B/4-bit vs 9B/8-bit).**
 | Stage-2 T2 (input+commit) | **2/2** | **2/2** |
 | Stage-2 T3 (short horizon) | 0/2 (1 todo, wrong item completed) | 0/2 (1 todo, wrong item completed) |
 | Stage-2 e2e T2 | 11.1 s | 15.4 s |
-| Stage-3 real-work success | **0/6** | **0/6** |
+| Stage-3 real-work success (Fara, local) | **0/6** | **0/6** |
+| Stage-3 strong-agent baseline (same tasks, same verifier) | **browser-relay 4/6, raw-playwright 3/6, cdp-browser 4/6, agent-browser 3/6** — measured |
 | Stage-3 wall per task (median) | 65 s | 228 s |
 | Stage-3 per-turn p50 / p95 | 3.41 s / 3.68 s | 17.8 s / 20.9 s |
 | Cold load | 4.1 s | 5.5 s |
@@ -204,14 +205,19 @@ comparison in the repo: **one variable, capacity (4B/4-bit vs 9B/8-bit).**
 - **T1/T2: no difference.** Both clear the one-step and input+commit tasks, 2/2.
 - **T3: no difference.** Both fail, and for the *same* reason — after one todo the model
   commits the wrong item and takes the wrong branch; 9B is not closer to passing.
-- **Stage 3: no difference in outcome, large difference in cost.** Both score 0/6 on the
-  stratified real-work set. The binding limit is **architectural, not capacity**: Fara's
-  action space has no JS-eval and no DOM primitive, so live-site tasks whose ground truth
-  is recomputed from page scripts (`porsche-uk-script-inventory`, `puma-uk-*`,
-  `rajeevg-*`, `tldraw`) are out of reach for *any* Fara artifact — the model emits a
-  visual click stream and never a `window.__bench_finding`. 9B simply spends **3.5× the
-  wall time** (228 s vs 65 s per task) and **2.3× the memory** (11.6 GB vs 7.2 GB) to
-  reach the same zero.
+- **Stage 3: no difference between the two Fara sizes, and a measured boundary against
+  strong agents.** Both Fara sizes score 0/6 on the stratified real-work set, while the
+  **existing strong-agent baselines on the identical tasks and verifier pass 3–4/6**
+  (browser-relay 4/6, cdp-browser 4/6, agent-browser 3/6, raw-playwright 3/6 — see §5.7).
+  So this is **not** a "both models are equally good" tie; it is a **channel limit**: the
+  strong agents pass because they own a DOM/eval loop, whereas Fara's action space has no
+  JS-eval and no DOM primitive, so live-site tasks whose ground truth is recomputed from
+  page scripts (`porsche-uk-script-inventory`, `puma-uk-*`, `rajeevg-*`, `tldraw`) are out
+  of reach for *any* Fara artifact — the model emits a visual click stream and never a
+  `window.__bench_finding`. 9B simply spends **3.5× the wall time** (228 s vs 65 s per
+  task) and **2.3× the memory** (11.6 GB vs 7.2 GB) to reach the same zero that a strong
+  agent clears 3–4 times out of 6. The Stage-3 comparison is therefore **evidence of a
+  delegation boundary**, not evidence of 4B/9B parity.
 
 ### 5.3 Delegation frontier
 
@@ -221,7 +227,7 @@ comparison in the repo: **one variable, capacity (4B/4-bit vs 9B/8-bit).**
 | Actor (low-level action, given subgoal) | T1 2/2 | T1 2/2 | ShowUI-2B native nav prompt | No (planner supplies subgoal) | **ShowUI-2B actor** | point misses on dense UI |
 | Short deterministic multi-step (T1/T2) | 2/2 | 2/2 | — | No for T1/T2 | **Fara-4B, local** | horizon >2 or stateful → planner |
 | Short horizon / stateful (T3) | 0/2 | 0/2 | — | **Yes** | **local actor + strong planner** | any multi-item state task |
-| Real-work retrieval/audit (live site, DOM truth) | 0/6 | 0/6 | — | **Yes** | **strong planner** (harness has eval) + local actor | never route bare Fara here |
+| Real-work retrieval/audit (live site, DOM truth) | 0/6 | 0/6 | — | **Yes** (baseline 3–4/6 with strong agent) | **strong planner** (owns DOM/eval) + local actor | never route bare Fara here |
 | Commerce/consent flow (live site) | 0/6 | 0/6 | — | **Yes** | **strong planner** | never route bare Fara here |
 
 ### 5.4 Routing / escalation policy
@@ -284,11 +290,28 @@ their own `verify_js` + `pass_rule.py`. The stratified set chosen for class cove
 | `puma-uk-tag-inspection` | 2 form/commerce | no (live) |
 | `chanel-gb-pdp-tag-inspection` | 1 simple retrieve | no (live, 403 to plain fetch) |
 
-Scoring uses the corpus's own verifier: `run_stage3.py` navigates with
+**Reproducibility.** The 6 task specs are now **vendored** into this repo under
+`corpus/microbench/` (with `SOURCE.json` pinning each file's sha256 and the producing
+repo) plus `corpus/microbench/pass_rule.py`. `run_stage3.py` loads from the vendored copy
+by default; set `MB_CORPUS_EXT=/path/to/web-automation-microbench/bench-ext` to re-harvest
+from a live checkout. Note the tasks themselves hit **live third-party sites**
+(porsche.com, gymshark, puma, tldraw, rajeevg.com), so `stage3.jsonl` is a **point-in-time
+measurement**: DOM/content drift means it will not re-run to an identical state. Every row
+now carries `run_id`, `row_ts`, `git_rev` and `corpus` provenance so runs remain
+distinguishable.
+
+**Scoring + the strong-agent baseline.** `run_stage3.py` navigates with
 `wait_until=domcontentloaded`, replays one model action per turn under the common
 Playwright executor, then evaluates the task's `verify_js` and hands `{truth, finding}`
-to `pass_rule.evaluate`. The relay is identical for both models, so the comparison is
-fair. A negative result here is the honest outcome and is not tuned away.
+to `pass_rule.evaluate`. The relay is identical for both models. The **strong-agent
+baseline is measured, not asserted**: the existing `web-automation-microbench`
+harvested-corpus screen (`artifacts/2026-09-12/corpus/`, model `z-ai/glm-5.3-flash`)
+scored the same 6 tasks with the same verifier — porsche-uk-script-inventory 1/1–3/3,
+rajeevg-crawlability-audit 1/1–3/3, puma-uk-tag-inspection 1/1–3/3 across agent-browser /
+browser-relay / cdp-browser / raw-playwright, i.e. **3–4 of 6 tasks cleared** where both
+Fara sizes clear 0. Truncation check (finding F5): across all 13 Stage-3 runs, **0 turns
+hit `finish_reason=length`**, so none of the 0/6 is a 512-token cut-off artefact. A
+negative result here is the honest outcome and is not tuned away.
 
 ```bash
 .venv/bin/python -m harness.run_stage1 fara    --warm-reps 3

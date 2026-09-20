@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import statistics as st
 import sys
@@ -22,7 +23,13 @@ import time
 import traceback
 from pathlib import Path
 
-CORPUS = Path("/Users/rajeev/Code/web-automation-microbench/bench-ext")
+# F2: the corpus is VENDORED into this repo (corpus/microbench/) so Stage 3 is
+# reproducible without an external checkout. A live upstream checkout can still
+# be used via MB_CORPUS_EXT for re-harvests, but the committed default is local.
+VENDORED = Path(__file__).resolve().parent.parent / "corpus" / "microbench"
+_EXT = os.environ.get("MB_CORPUS_EXT")
+CORPUS = Path(_EXT) if _EXT else VENDORED
+TASKS_DIR = (CORPUS / "corpus" / "tasks") if _EXT else (CORPUS / "tasks")
 sys.path.insert(0, str(CORPUS))
 import pass_rule  # noqa: E402
 
@@ -33,6 +40,20 @@ from .adapters import get_adapter  # noqa: E402
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 JSONL = RESULTS / "stage3.jsonl"
 RUNS = RESULTS / "runs"
+
+
+def _provenance() -> dict:
+    """F4: every row carries a run id, timestamp and git rev so an append-only
+    results file can be disambiguated and an individual run reproduced."""
+    import subprocess
+    try:
+        rev = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                             capture_output=True, text=True).stdout.strip()
+    except Exception:
+        rev = ""
+    return {"run_id": time.strftime("%Y%m%d-%H%M%S"), "row_ts": time.time(),
+            "git_rev": rev,
+            "corpus": "vendored" if CORPUS == VENDORED else "external"}
 
 # Stratified real-work set (>=5), chosen for class coverage, NOT to favour a model.
 #   simple find/open/retrieve | filters/forms/report | short deterministic multi-step
@@ -118,14 +139,15 @@ def run(model_key, tasks, max_steps=14, nav_timeout=30000):
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     for tid in tasks:
-        spec = json.loads((CORPUS / "corpus" / "tasks" / f"{tid}.json").read_text())
+        spec = json.loads((TASKS_DIR / f"{tid}.json").read_text())
         instr = spec["instruction"] + DIRECTIVE
         row = {"stage": 3, "model": ad.name, "family": ad.family, "role": ad.role,
                "artifact": ad.artifact, "runtime": ad.runtime, "quant": ad.quant,
                "task": tid, "stratum": STRATA.get(tid, "?"), "url": spec["url"],
                "capabilities": spec.get("capabilities"), "pass_rule_kind":
                (spec["verification"].get("pass_rule") or {}).get("kind"),
-               "cold_load_s": round(cold, 3), "local": ad.runtime != "cloud"}
+               "cold_load_s": round(cold, 3), "local": ad.runtime != "cloud",
+               **_provenance()}
         steps, lat, hist = [], [], []
         wall0 = time.perf_counter()
         try:
@@ -143,7 +165,14 @@ def run(model_key, tasks, max_steps=14, nav_timeout=30000):
                 para["executor"] = _execute(ex, act)
                 hist.append(("assistant", pred.native_text))
                 steps.append(para)
-                if act.kind in ("done", "answer"):
+                # F3: Fara's native terminal actions are `terminate` and
+                # `read_page_answer_question`, which parse_fara normalises to
+                # `done` / `answer`. Break on either the normalised kind OR the
+                # raw native action name, so a parse change cannot silently stop
+                # the relay (which would make every task look unpassable).
+                raw_action = (act.raw or {}).get("arguments", {}).get("action")
+                if act.kind in ("done", "answer") or raw_action in (
+                        "terminate", "read_page_answer_question", "ask_user_question"):
                     obj = _extract_json(act.text)
                     if obj is not None:
                         ex.page.evaluate("(v) => { window.__bench_finding = v; }", obj)

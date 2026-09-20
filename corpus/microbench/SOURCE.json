@@ -1,0 +1,32 @@
+{
+  "source_repo": "Rajeev-SG/web-automation-microbench",
+  "source_path": "bench-ext/corpus/tasks",
+  "harvested_from": "/Users/rajeev/Code/web-automation-microbench/bench-ext",
+  "schema": "pareto-research-task-definition/v1",
+  "tasks": {
+    "porsche-uk-script-inventory": {
+      "sha256": "b7792ffc84cc5dde615d0a494220eb1f5f67dadbd0939d806367eca9c5435279",
+      "bytes": 4364
+    },
+    "gymshark-uk-add-to-cart-tag-check": {
+      "sha256": "8a9126df18bf4ac9ce03375f256d4e4971c66e10edfe7d10a759c62b8585ece6",
+      "bytes": 7433
+    },
+    "tldraw-three-shape-diagram": {
+      "sha256": "66ab246ed4cf578e3d24c93ad32be0f27f222b40eaac037244d450347cf9bcb2",
+      "bytes": 4774
+    },
+    "rajeevg-crawlability-audit": {
+      "sha256": "7557a23861b14564133833508d891d94fbf57c8a7a8414d429673f3177721837",
+      "bytes": 5228
+    },
+    "puma-uk-seo-metadata-audit": {
+      "sha256": "8b4ccfb7a7726081276be23e401b08c98211e8cb5b1b635e1b9c5ce44ff218d3",
+      "bytes": 5373
+    },
+    "puma-uk-tag-inspection": {
+      "sha256": "ffa1496425693c5bebea584ad615d68900d0913334b8fc2fde4bd7c51b813e0d",
+      "bytes": 4783
+    }
+  }
+}
