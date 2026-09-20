@@ -33,9 +33,8 @@ TASKS_DIR = (CORPUS / "corpus" / "tasks") if _EXT else (CORPUS / "tasks")
 sys.path.insert(0, str(CORPUS))
 import pass_rule  # noqa: E402
 
-from .browser import Executor  # noqa: E402
-from .metrics import peak_rss_self_mb, device_peak_mb  # noqa: E402
-from .adapters import get_adapter  # noqa: E402
+# Heavy runtime deps (Playwright, mlx-vlm) are imported lazily inside run() so
+# importing this module for tests does not require the full browser stack.
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 JSONL = RESULTS / "stage3.jsonl"
@@ -128,6 +127,15 @@ def _pct(vals, q):
 
 
 def run(model_key, tasks, max_steps=14, nav_timeout=30000):
+    from .browser import Executor
+    from .metrics import peak_rss_self_mb, device_peak_mb
+    from .adapters import get_adapter
+    return _run_impl(model_key, tasks, max_steps, nav_timeout, Executor,
+                     peak_rss_self_mb, device_peak_mb, get_adapter)
+
+
+def _run_impl(model_key, tasks, max_steps, nav_timeout, Executor,
+              peak_rss_self_mb, device_peak_mb, get_adapter):
     ex = Executor()
     ex.start()
     viewport = ex.viewport
